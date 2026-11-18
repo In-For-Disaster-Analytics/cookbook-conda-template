@@ -141,3 +141,30 @@ Each app has a unique `id` and `description`. So, you should change these fields
 
 - William Mobley - wmobley@tacc.utexas.edu
 - Maximiliano Osorio - maxiosorio@gmail.com
+
+
+## Registry compatibility pilot
+
+The original repository (ID `806583770`) continues publishing the legacy image
+at `ghcr.io/in-for-disaster-analytics/cookbook-conda-template`. Repositories
+generated from this template keep their own `github.repository` image path. Pull requests
+build without publishing. A manual run of `.github/workflows/.docker.yaml`
+on `main` can exercise publication under unique `migration-pilot-*` tags in
+that legacy namespace and `ghcr.io/tacc-decision-support/cookbook-conda-template`.
+It does not promote `main`, `latest`, or version tags, and does not transfer
+the repository or create Tapis resources.
+
+Before dispatching, configure protected environments
+`registry-compatibility-pilot` and `registry-compatibility-public-check` with
+reviewers and main-only deployment rules. Only the first environment holds
+variable `GHCR_COMPAT_USERNAME` and secret `GHCR_COMPAT_TOKEN` for the approved
+publishing identity. After copying, verify the canonical package is public
+before approving the second environment. The verifier uses anonymous access
+and compares index/child-manifest digests and the legacy consumer-tag baseline.
+Successful evidence is retained as an Actions artifact for 30 days.
+
+If the second publication fails, retain the legacy pilot tag/digest and retry
+copying that exact digest after review; do not rebuild to repair that artifact.
+Keep failed-run evidence. Never overwrite or delete an existing consumer tag
+as part of this pilot. Post-transfer permissions and automatic dual publishing
+require separate validation before repository transfer.
